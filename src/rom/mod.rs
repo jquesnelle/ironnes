@@ -88,14 +88,14 @@ impl Rom {
       // according to pc_inst: http://wiki.nesdev.com/w/index.php/PC10_ROM-Images
       // these aren't always here... will we eat the name at the end if they aren't? */
 
-      file.read(rom.pc_prom);
+      file.read(rom.pc_prom).unwrap();
 
     }
 
     let mut name_buf: Vec<u8> = Vec::new();
     name_buf.grow(128, &(0i as u8));
     match file.read(name_buf.as_mut_slice()) {
-      Ok(s) => {
+      Ok(_) => {
         rom.name = match String::from_utf8(name_buf) {
           Ok(s) => s,
           Err(_) => "".to_string()

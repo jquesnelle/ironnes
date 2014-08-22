@@ -19,7 +19,7 @@ extern crate getopts;
 
 use ironnes::log;
 use ironnes::emulator::Emulator;
-use getopts::{optopt, optflag, getopts, OptGroup, usage};
+use getopts::{optopt, optflag, getopts, usage};
 use std::{os, io};
 
 fn main() {
@@ -27,7 +27,7 @@ fn main() {
   let mut emulator = Emulator::new();
 
   let args: Vec<String> = os::args();
-  let program = args[0].clone();
+  //let program = args[0].clone();
 
   let opts = [
     optopt("l", "logLevel", "set the log level", "LEVEL"),
