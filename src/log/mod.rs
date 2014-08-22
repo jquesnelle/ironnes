@@ -15,7 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use std::io;
+extern crate term;
 
 pub enum Level {
   Error,
@@ -24,7 +24,7 @@ pub enum Level {
 }
 
 pub struct Log {
-  pub log_level: Level
+  pub log_level: Level,
 }
 
 impl Log {
@@ -43,7 +43,23 @@ impl Log {
 
   pub fn log(&self, message: &str, level: Level) {
     if level as int <= self.log_level as int {
-      io::println(message);
+      let mut t = term::stdout().unwrap();
+
+      // need these unwraps to avoid warning: unused result which must be used
+
+      (t.reset()).unwrap();
+      write!(t, "[");
+
+      match level {
+        Error => { (t.fg(term::color::RED)).unwrap(); (write!(t, "ERROR")).unwrap(); },
+        Normal => { (t.fg(term::color::WHITE)).unwrap(); (write!(t, "     ")).unwrap(); },
+        Debug => { (t.fg(term::color::YELLOW)).unwrap(); (write!(t, "DEBUG")).unwrap(); }
+      }
+
+      (t.reset()).unwrap();
+      (write!(t, "] ")).unwrap();
+
+      (t.write_line(message)).unwrap();
     }
   }
 
