@@ -33,7 +33,7 @@ impl Emulator {
 
   pub fn load_rom(&mut self, path: &Path) -> Result<(), String> {
     self.loaded_rom = match Rom::load(path, self) {
-      Ok(e) => Some(box e),
+      Ok(e) => Some(e),
       Err(e) => return Err(e)
     };
     return Ok(());

@@ -31,13 +31,13 @@ pub struct Rom {
 }
 
 impl Rom {
-  pub fn load(path: &Path, emulator: &Emulator) -> Result<Rom, String> {
+  pub fn load(path: &Path, emulator: &Emulator) -> Result<Box<Rom>, String> {
     let bad_format = String::from_str("Invald ROM format");
     let mut file = match File::open(path) {
       Ok(e) => e,
       Err(_) => return Err(format!("Unable to open {}", path.display()))
     };
-    let mut rom = Rom {
+    let mut rom = box Rom {
       header: [0, ..16],
       trainer: [0, ..512],
       prg: Vec::new(),
