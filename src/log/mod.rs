@@ -48,7 +48,7 @@ impl Log {
       // need these unwraps to avoid warning: unused result which must be used
 
       (t.reset()).unwrap();
-      write!(t, "[");
+      (write!(t, "[")).unwrap();
 
       match level {
         Error => { (t.fg(term::color::RED)).unwrap(); (write!(t, "ERROR")).unwrap(); },
