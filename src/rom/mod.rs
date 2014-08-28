@@ -55,7 +55,7 @@ impl Rom {
     match rom.header.slice(0, 4) {
       [0x4e, 0x45, 0x53, 0x1a] => (),
       _ => {
-        emulator.logger.log_debug("ROM does not have magic bytes in header; not a ROM?");
+        log_debug!(emulator.logger "ROM does not have magic bytes in header; not a ROM?");
         return Err(bad_format);
       }
     };
@@ -85,7 +85,7 @@ impl Rom {
         return Err(bad_format);
       }
 
-      // according to pc_inst: http://wiki.nesdev.com/w/index.php/PC10_ROM-Images
+      // according to nesdev: http://wiki.nesdev.com/w/index.php/PC10_ROM-Images
       // these aren't always here... will we eat the name at the end if they aren't? */
 
       file.read(rom.pc_prom).unwrap();
@@ -104,11 +104,27 @@ impl Rom {
       Err(_) => ()
     }
 
-    if rom.name.is_empty() {
-      emulator.logger.log_debug(format!("Finished loading ROM {}",path.display()).as_slice());
-    }
-    else {
-      emulator.logger.log_debug(format!("Finished loading ROM {} at {}", rom.name, path.display()).as_slice());
+    {
+      let rom_name = if rom.name.is_empty() {
+        path.as_str().expect("Unknown name")
+      }
+      else {
+        rom.name.as_slice()
+      };
+
+      log_debug!(emulator.logger "Finished loading ROM {}", rom_name);
+      log_debug!(emulator.logger "\tPRG-ROM bank count: {}", rom.header[4]);
+      log_debug!(emulator.logger "\tCHR-ROM bank count: {}", rom.header[5]);
+      log_debug!(emulator.logger "\tROM Control Byte 1: 0x{:X}", rom.header[6]);
+      log_debug!(emulator.logger "\t\tMapping: {}", if (rom.header[6] & 1) == 1 { "Horizontal" } else { "Verical" });
+      log_debug!(emulator.logger "\t\tSRAM: {}", if (rom.header[6] & 2) == 2 { "Enabled " } else { "Disabled" });
+      log_debug!(emulator.logger "\t\tTrainer: {}", if(rom.header[6] & 4) == 4 { "Present" } else { "Not present" });
+      log_debug!(emulator.logger "\t\tFour-screen VRAM layout: {}", if(rom.header[6] & 8) == 8 { "True" } else { "False" });
+      log_debug!(emulator.logger "\t\tMapper lower nibble: 0x{:X}", (rom.header[6] >> 4));
+      log_debug!(emulator.logger "\tROM Control Byte 2: 0x{:X}", rom.header[7]);
+      log_debug!(emulator.logger "\t\tPlayChoice-10 ROM: {}" , if (rom.header[7] & 2) == 2 { "True" } else { "False" });
+      log_debug!(emulator.logger "\t\tMapper upper nibble: 0x{:X}", (rom.header[7] >> 4));
+      log_debug!(emulator.logger "\tRAM bank count: {}", rom.header[8]);
     }
 
     return Ok(rom);

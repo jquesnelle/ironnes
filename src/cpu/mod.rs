@@ -15,24 +15,12 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#![feature(macro_rules)]
+pub struct Cpu {
+  pub pc: u16,
+  pub sp: u8,
+  pub a: u8,
+  pub x: u8,
+  pub y: u8,
+  pub p: u8
 
-#[macro_export]
-macro_rules! log_normal {
-  ($emu:expr $($arg:tt)*) => (
-      $emu.log_normal(format_args!(::std::fmt::format, $($arg)*).as_slice())
-  )
 }
-
-#[macro_export]
-macro_rules! log_debug {
-  ($emu:expr $($arg:tt)*) => (
-      $emu.log_debug(format_args!(::std::fmt::format, $($arg)*).as_slice())
-  )
-}
-
-pub mod log;
-pub mod rom;
-pub mod emulator;
-pub mod board;
-pub mod cpu;

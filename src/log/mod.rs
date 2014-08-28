@@ -62,5 +62,4 @@ impl Log {
       (t.write_line(message)).unwrap();
     }
   }
-
 }
