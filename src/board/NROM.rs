@@ -15,40 +15,29 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use log::{Log, Normal};
 use rom::Rom;
 use std::rc::Rc;
 use std::cell::RefCell;
-use board::{Board, load_board};
+use super::Board;
 
-pub struct Emulator {
-  pub logger: Log,
-  loaded_rom: Option<Rc<RefCell<Rom>>>,
-  board: Option<Box<Board>>
+pub struct Nrom {
+  rom: Rc<RefCell<Rom>>
 }
 
-impl Emulator {
-  pub fn new() -> Emulator {
-    Emulator {
-      logger: Log { log_level: Normal },
-      loaded_rom: None,
-      board: None
+impl Board for Nrom {
+
+  fn new(_dummy: Option<Nrom>, rom: &Rc<RefCell<Rom>>) -> Nrom {
+    return Nrom {
+      rom: rom.clone()
     }
   }
 
-  pub fn load_rom(&mut self, path: &Path) -> Result<(), String> {
-    match Rom::load(path, self) {
-      Ok(e) => {
-        {
-          match load_board(self, &e) {
-            Ok(b) => self.board = Some(b),
-            Err(b) => return Err(b)
-          }
-        }
-        self.loaded_rom = Some(e);
-      },
-      Err(e) => return Err(e)
+  fn get_name(&self) -> &'static str {
+    let rom = self.rom.borrow();
+    match rom.header[4] {
+      1 => "NROM-128",
+      2 => "NROM-256",
+      _ => "NROM (non-standard)"
     }
-    return Ok(());
   }
 }

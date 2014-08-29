@@ -17,7 +17,8 @@
 
 use std::io::{File};
 use emulator::Emulator;
-use std::kinds::marker::NoCopy;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Rom {
   pub header: [u8, ..16],
@@ -26,26 +27,24 @@ pub struct Rom {
   pub chr: Vec<u8>,
   pub pc_inst: [u8, ..8192],
   pub pc_prom: [u8, ..32],
-  pub name: String,
-  _marker: NoCopy
+  pub name: String
 }
 
 impl Rom {
-  pub fn load(path: &Path, emulator: &Emulator) -> Result<Box<Rom>, String> {
+  pub fn load(path: &Path, emulator: &Emulator) -> Result<Rc<RefCell<Rom>>, String> {
     let bad_format = String::from_str("Invald ROM format");
     let mut file = match File::open(path) {
       Ok(e) => e,
       Err(_) => return Err(format!("Unable to open {}", path.display()))
     };
-    let mut rom = box Rom {
+    let mut rom = Rom {
       header: [0, ..16],
       trainer: [0, ..512],
       prg: Vec::new(),
       chr: Vec::new(),
       pc_inst: [0, ..8192],
       pc_prom: [0, ..32],
-      name: "".to_string(),
-      _marker: NoCopy
+      name: "".to_string()
     };
 
     if file.read(rom.header) != Ok(16) {
@@ -127,6 +126,6 @@ impl Rom {
       log_debug!(emulator.logger "\tRAM bank count: {}", rom.header[8]);
     }
 
-    return Ok(rom);
+    return Ok(Rc::new(RefCell::new(rom)));
   }
 }

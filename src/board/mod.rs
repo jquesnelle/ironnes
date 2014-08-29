@@ -15,39 +15,30 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use board::NROM::Nrom;
 use emulator::Emulator;
 use rom::Rom;
+use std::rc::Rc;
+use std::cell::RefCell;
+
+mod NROM;
 
 pub trait Board {
-  pub fn new(rom: &Rom) -> Self;
-  pub fn get_name(&self) -> &'static str;
+  //see my SO question: http://stackoverflow.com/questions/25563667/implementing-rust-traits-cause-struct-to-not-be-found
+  fn new(_dummy: Option<Self>, rom: &Rc<RefCell<Rom>>) -> Self;
+  fn get_name(&self) -> &'static str;
 }
 
-struct Nrom<'a> {
-  rom: &'a Rom
-}
-
-impl Board for Nrom {
-
-  pub fn new(rom: &Rom) -> Nrom {
-    return Nrom {
-      rom: rom
-    }
+pub fn load_board(emulator: &Emulator, rom_ref: &Rc<RefCell<Rom>>) -> Result<Box<NROM>, String> {
+  let mut mapper_no: u8;
+  {
+    let rom = &rom_ref.borrow();
+    mapper_no = (rom.header[6] >> 4) | (rom.header[7] & 0xf0);
   }
-
-  pub fn get_name(&self) -> &'static str {
-    match self.rom.header[4] {
-      1 => "NROM-128",
-      2 => "NROM-256",
-      _ => "NROM (non-standard)"
-    }
-  }
-}
-
-pub fn load_board(emulator: &Emulator, rom: &Rom) -> Result<Box<Board>, String> {
-  let mapper_no = (rom.header[6] >> 4) | (rom.header[7] & 0xf0);
-  match mapper_no {
-    0 => Nrom::new(rom),
+  let board = match mapper_no {
+    0 => box Nrom::new(None::<Nrom>, rom_ref),
     _ => return Err("Unimplemented board".to_string())
-  }
+  };
+  log_debug!(emulator.logger "Using board {}", board.get_name());
+  return Ok(board);
 }
